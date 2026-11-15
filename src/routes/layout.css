@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geologica';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/* Tema gelap dikendalikan class, bukan setting OS. Tanpa baris ini, `dark:`
+   mengikuti laptop masing-masing peserta dan tombol tema tidak berpengaruh. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+	--bg: #fcfcfa;
+	--surface: #f4f4f1;
+	--line: #e2e2dc;
+	--ink: #12120f;
+	--muted: #6b6b62;
+	--primary: #1d3fd1;
+	--on-primary: #fcfcfa;
+	--success: #047857;
+	--danger: #b91c1c;
+}
+
+@theme inline {
+	--color-bg: var(--bg);
+	--color-surface: var(--surface);
+	--color-line: var(--line);
+	--color-ink: var(--ink);
+	--color-muted: var(--muted);
+	--color-primary: var(--primary);
+	--color-on-primary: var(--on-primary);
+	--color-success: var(--success);
+	--color-danger: var(--danger);
+	--font-sans: 'Geologica Variable', sans-serif;
+	--font-mono: 'IBM Plex Mono', monospace;
+	--radius-xs: 2px;
+}
