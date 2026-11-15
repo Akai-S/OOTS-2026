@@ -1,129 +1,66 @@
-# CP 04 — Komponen
+# CP 05 — Form
 
-Satu blok markup yang dipakai berkali-kali berubah jadi satu file.
+Form kontak yang menjawab. Belum mengirim email — tapi seluruh alurnya sudah
+bisa dilihat.
 
 ## Apa yang berubah
 
-- `src/lib/components/ProjectRow.svelte`: baris proyek jadi komponen.
-  Menerima `project` dan `index` lewat `$props()`.
-- `{#each}` sekarang **keyed** — `(project.title)`. Svelte tahu baris mana
-  yang berubah, bukan menebak dari urutan.
-- `{#if project.href}` — panah hanya muncul kalau proyeknya punya tautan.
-  Hapus `href` dari satu proyek di `data.ts` dan panahnya hilang.
-- Section **Tentang**: potret, bio, empat baris fakta, dan badge keahlian.
-  Isinya dari `profile` di `data.ts`.
+- Section **Kontak**: tiga kolom dan satu tombol.
+- `status` (`'idle' | 'loading' | 'success' | 'error'`) mengendalikan tampilan
+  tombol dan baris pesan.
+- `+page.server.ts` berisi action `kirim` yang memvalidasi lalu **berpura-pura
+  berhasil**. Tidak ada email yang keluar. Ini disengaja: alurnya dulu, isinya
+  nanti.
+- `use:enhance` membuat form tidak me-reload halaman.
 
-Perhatikan `href?: string` — tanda tanya itu artinya opsional. TypeScript akan
-menolak kalian membaca `project.href` tanpa memeriksanya lebih dulu. `{#if}`
-adalah pemeriksaan itu.
+Perhatikan: tidak ada `$effect` di mana pun. Perubahan status terjadi di dalam
+event handler, bukan di belakang layar.
 
 ## Salin ini
 
-`src/lib/components/ProjectRow.svelte`
-
-```svelte
-<script lang="ts">
-	import type { Project } from '$lib/data';
-
-	type Props = {
-		project: Project;
-		index: number;
-	};
-
-	let { project, index }: Props = $props();
-</script>
-
-<div class="flex flex-col gap-2.5 py-7">
-	<div class="flex items-center justify-between">
-		<span class="font-mono text-[11px] tracking-[1.1px]">
-			{String(index + 1).padStart(2, '0')}
-		</span>
-
-		<div class="flex items-center gap-5">
-			<span class="font-mono text-[11px] tracking-[1.1px] uppercase">{project.stack}</span>
-			<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
-
-			{#if project.href}
-				<a href={project.href} aria-label="Buka {project.title}" class="text-primary">
-					<svg
-						width="16"
-						height="16"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="1.5"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="M7 17 17 7M9 7h8v8" />
-					</svg>
-				</a>
-			{/if}
-		</div>
-	</div>
-
-	<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">{project.title}</h2>
-	<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
-</div>
-```
-
-`src/lib/data.ts`
+`src/routes/+page.server.ts`
 
 ```ts
-export type Project = {
-	title: string;
-	description: string;
-	stack: string;
-	year: number;
-	href?: string;
-};
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
 
-export const projects: Project[] = [
-	{
-		title: 'Sistem Absensi Kelas',
-		description: 'Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.',
-		stack: 'SvelteKit',
-		year: 2026,
-		href: 'https://github.com/nama-kamu/absensi'
-	},
-	{
-		title: 'Landing Page UKM',
-		description: 'Halaman profil organisasi sekolah dengan formulir pendaftaran anggota.',
-		stack: 'Tailwind',
-		year: 2026,
-		href: 'https://github.com/nama-kamu/ukm'
-	},
-	{
-		title: 'Dashboard Jaringan',
-		description: 'Pemantauan status perangkat lab sekolah secara real-time.',
-		stack: 'TypeScript',
-		year: 2026,
-		href: 'https://github.com/nama-kamu/dashboard'
+export const actions = {
+	kirim: async ({ request }) => {
+		const data = await request.formData();
+
+		const nama = String(data.get('nama') ?? '').trim();
+		const email = String(data.get('email') ?? '').trim();
+		const pesan = String(data.get('pesan') ?? '').trim();
+
+		if (!nama || !email || !pesan) {
+			return fail(400, { pesan: 'Semua kolom harus diisi.' });
+		}
+
+		if (!email.includes('@')) {
+			return fail(400, { pesan: 'Format email belum benar.' });
+		}
+
+		// CP05: belum ada yang dikirim ke mana-mana. Kita pura-pura berhasil
+		// dulu supaya seluruh alurnya bisa dilihat. Email sungguhan menyusul
+		// di CP06.
+		return { sukses: true };
 	}
-];
-
-export const profile = {
-	bio: 'Saya suka membangun hal yang berguna dan terlihat rapi. Saat ini belajar SvelteKit dan TypeScript, sambil mengerjakan proyek kecil untuk sekolah dan komunitas.',
-	facts: [
-		{ label: 'FOKUS', value: 'Antarmuka web & sistem informasi' },
-		{ label: 'STACK', value: 'SvelteKit · TypeScript · Tailwind' },
-		{ label: 'LOKASI', value: 'Indonesia' },
-		{ label: 'STATUS', value: 'Terbuka untuk kolaborasi' }
-	],
-	skills: ['HTML', 'CSS', 'JavaScript', 'SvelteKit', 'Tailwind', 'Git']
-};
+} satisfies Actions;
 ```
 
 `src/routes/+page.svelte`
 
 ```svelte
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { projects, profile } from '$lib/data';
 	import ProjectRow from '$lib/components/ProjectRow.svelte';
 
 	type Theme = 'light' | 'dark';
+	type Status = 'idle' | 'loading' | 'success' | 'error';
 
 	let theme: Theme = $state('light');
+	let status: Status = $state('idle');
 </script>
 
 <div class="min-h-dvh bg-bg text-ink {theme === 'dark' ? 'dark' : ''}">
@@ -302,6 +239,144 @@ export const profile = {
 		</div>
 	</section>
 
+	<!-- kontak -->
+	<section id="kontak" class="border-t border-line">
+		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
+			<p class="font-mono text-[11px] tracking-[1.1px]">KONTAK</p>
+
+			<div class="mt-7 flex flex-col gap-8 lg:mt-10 lg:flex-row lg:gap-24">
+				<p class="max-w-[420px] text-[17px] leading-[1.6] text-muted lg:text-xl">
+					Punya pertanyaan atau ingin bekerja sama? Kirim pesan.
+				</p>
+
+				<form
+					method="POST"
+					action="?/kirim"
+					use:enhance={() => {
+						status = 'loading';
+						return async ({ result, update }) => {
+							await update({ reset: result.type === 'success' });
+							status = result.type === 'success' ? 'success' : 'error';
+						};
+					}}
+					class="flex w-full flex-col gap-4 lg:w-[440px] lg:shrink-0"
+				>
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">NAMA</span>
+						<input
+							name="nama"
+							required
+							autocomplete="name"
+							placeholder="Nama lengkap kamu"
+							class="h-12 w-full border border-line bg-bg px-3.5 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">EMAIL</span>
+						<input
+							name="email"
+							type="email"
+							required
+							autocomplete="email"
+							placeholder="nama@email.com"
+							class="h-12 w-full border border-line bg-bg px-3.5 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">PESAN</span>
+						<textarea
+							name="pesan"
+							required
+							rows="5"
+							placeholder="Tulis pesan kamu di sini"
+							class="min-h-[120px] w-full border border-line bg-bg px-3.5 py-3 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						></textarea>
+					</label>
+
+					<button
+						type="submit"
+						disabled={status === 'loading'}
+						class="flex h-12 items-center justify-center gap-2 border px-6 text-[15px] font-medium {status ===
+						'loading'
+							? 'border-line bg-surface text-muted'
+							: 'border-transparent bg-primary text-on-primary'}"
+					>
+						{#if status === 'loading'}
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								class="animate-spin"
+							>
+								<path d="M12 3a9 9 0 1 0 9 9" />
+							</svg>
+							Mengirim...
+						{:else}
+							Kirim pesan
+						{/if}
+					</button>
+
+					{#if status !== 'idle'}
+						<div class="flex items-center gap-3 border border-line px-4 py-3.5">
+							{#if status === 'loading'}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									class="animate-spin text-muted"
+								>
+									<path d="M12 3a9 9 0 1 0 9 9" />
+								</svg>
+								<span class="text-sm text-muted">Mengirim pesan...</span>
+							{:else if status === 'success'}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-success"
+								>
+									<path d="M20 6 9 17l-5-5" />
+								</svg>
+								<span class="text-sm text-success">Pesan terkirim. Terima kasih!</span>
+							{:else}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-danger"
+								>
+									<circle cx="12" cy="12" r="9" />
+									<path d="M12 8v5M12 16.5v.01" />
+								</svg>
+								<span class="text-sm text-danger">Gagal mengirim. Coba lagi.</span>
+							{/if}
+						</div>
+					{/if}
+				</form>
+			</div>
+		</div>
+	</section>
+
 	<!-- footer -->
 	<footer class="border-t border-line">
 		<div class="mx-auto flex max-w-[1440px] flex-col gap-10 px-6 py-14 lg:px-24">
@@ -335,36 +410,30 @@ export const profile = {
 
 ## Bandingkan
 
-/compare/03-each...04-komponen
+/compare/04-komponen...05-form
 
 ## Tantangan
 
-Halaman ini sekarang punya dua tempat yang memakai pola "baris dengan garis
-pemisah": daftar proyek dan daftar fakta. Yang satu sudah jadi komponen, yang
-satu belum.
+Hapus `required` dari kolom nama, lalu kirim form kosong. Kalian akan melihat
+status `error`. Sekarang lihat `+page.server.ts`: pesan error itu berasal dari
+`fail(400, …)`.
 
-Mana yang **layak** dijadikan komponen, dan mana yang tidak? Komponen yang
-dipakai sekali bukan komponen — itu cuma file tambahan.
-
-Bonus: ganti `(project.title)` dengan `(project)` di `{#each}`. Apa yang rusak
-saat kalian mengubah urutan proyek?
+Ganti teks "Semua kolom harus diisi." dengan kalimat kalian sendiri, lalu kirim
+form kosong lagi. Kalimat itu harus ikut berubah.
 
 ## Kalau macet
 
-| Gejala                                                   | Sebab                                                                |
-| -------------------------------------------------------- | -------------------------------------------------------------------- |
-| `Cannot find module '$lib/components/ProjectRow.svelte'` | Path salah, atau nama file beda huruf besar/kecil (Linux peka huruf) |
-| `project` undefined di komponen                          | Lupa `let { project } = $props();`                                   |
-| Props tidak berubah saat data diubah                     | `{#each}` tidak keyed, atau key-nya tidak unik                       |
-| Gambar potret gepeng                                     | `object-cover` hilang                                                |
-| `{#if}` tidak menghilangkan panah                        | Yang dicek bukan `project.href`, atau `href` masih ada di `data.ts`  |
+| Gejala                             | Sebab                                                                                         |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- |
+| Halaman reload saat tombol dikirim | `use:enhance` belum di-import atau belum dipasang di `<form>`                                 |
+| Status tidak pernah muncul         | `{#if status !== 'idle'}` hilang, atau `status` tidak pernah diubah di callback               |
+| Selalu `error`                     | Action `kirim` mengembalikan `fail(...)`, atau nama field di HTML beda dengan `data.get(...)` |
+| Kolom tidak kosong setelah sukses  | `update({ reset: true })` tidak dipanggil                                                     |
+| Tombol tidak bisa diklik           | `disabled={status === 'loading'}` — dan status-nya tersangkut                                 |
 
 ## Verifikasi
 
-```sh
-bun run check
-```
+Isi ketiga kolom, kirim. Tombol berubah jadi "Mengirim...", lalu muncul baris
+hijau "Pesan terkirim. Terima kasih!", dan kolom kembali kosong.
 
-Di 1440px potret harus 420×525, di 390px 342×428. Tiga panah muncul di daftar
-proyek. Hapus `href` dari proyek pertama — panahnya harus hilang, dan tidak ada
-error.
+Kirim form kosong setelah `required` dihapus: barisnya harus merah.

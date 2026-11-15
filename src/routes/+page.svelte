@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { projects, profile } from '$lib/data';
 	import ProjectRow from '$lib/components/ProjectRow.svelte';
 
 	type Theme = 'light' | 'dark';
+	type Status = 'idle' | 'loading' | 'success' | 'error';
 
 	let theme: Theme = $state('light');
+	let status: Status = $state('idle');
 </script>
 
 <div class="min-h-dvh bg-bg text-ink {theme === 'dark' ? 'dark' : ''}">
@@ -179,6 +182,144 @@
 						</div>
 					</div>
 				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- kontak -->
+	<section id="kontak" class="border-t border-line">
+		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
+			<p class="font-mono text-[11px] tracking-[1.1px]">KONTAK</p>
+
+			<div class="mt-7 flex flex-col gap-8 lg:mt-10 lg:flex-row lg:gap-24">
+				<p class="max-w-[420px] text-[17px] leading-[1.6] text-muted lg:text-xl">
+					Punya pertanyaan atau ingin bekerja sama? Kirim pesan.
+				</p>
+
+				<form
+					method="POST"
+					action="?/kirim"
+					use:enhance={() => {
+						status = 'loading';
+						return async ({ result, update }) => {
+							await update({ reset: result.type === 'success' });
+							status = result.type === 'success' ? 'success' : 'error';
+						};
+					}}
+					class="flex w-full flex-col gap-4 lg:w-[440px] lg:shrink-0"
+				>
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">NAMA</span>
+						<input
+							name="nama"
+							required
+							autocomplete="name"
+							placeholder="Nama lengkap kamu"
+							class="h-12 w-full border border-line bg-bg px-3.5 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">EMAIL</span>
+						<input
+							name="email"
+							type="email"
+							required
+							autocomplete="email"
+							placeholder="nama@email.com"
+							class="h-12 w-full border border-line bg-bg px-3.5 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">PESAN</span>
+						<textarea
+							name="pesan"
+							required
+							rows="5"
+							placeholder="Tulis pesan kamu di sini"
+							class="min-h-[120px] w-full border border-line bg-bg px-3.5 py-3 text-[15px] outline-none placeholder:text-muted focus:border-primary focus:ring-1 focus:ring-primary"
+						></textarea>
+					</label>
+
+					<button
+						type="submit"
+						disabled={status === 'loading'}
+						class="flex h-12 items-center justify-center gap-2 border px-6 text-[15px] font-medium {status ===
+						'loading'
+							? 'border-line bg-surface text-muted'
+							: 'border-transparent bg-primary text-on-primary'}"
+					>
+						{#if status === 'loading'}
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								class="animate-spin"
+							>
+								<path d="M12 3a9 9 0 1 0 9 9" />
+							</svg>
+							Mengirim...
+						{:else}
+							Kirim pesan
+						{/if}
+					</button>
+
+					{#if status !== 'idle'}
+						<div class="flex items-center gap-3 border border-line px-4 py-3.5">
+							{#if status === 'loading'}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									class="animate-spin text-muted"
+								>
+									<path d="M12 3a9 9 0 1 0 9 9" />
+								</svg>
+								<span class="text-sm text-muted">Mengirim pesan...</span>
+							{:else if status === 'success'}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-success"
+								>
+									<path d="M20 6 9 17l-5-5" />
+								</svg>
+								<span class="text-sm text-success">Pesan terkirim. Terima kasih!</span>
+							{:else}
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-danger"
+								>
+									<circle cx="12" cy="12" r="9" />
+									<path d="M12 8v5M12 16.5v.01" />
+								</svg>
+								<span class="text-sm text-danger">Gagal mengirim. Coba lagi.</span>
+							{/if}
+						</div>
+					{/if}
+				</form>
 			</div>
 		</div>
 	</section>
