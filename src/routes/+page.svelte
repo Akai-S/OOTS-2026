@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { projects } from '$lib/data';
+
 	type Theme = 'light' | 'dark';
 
 	let theme: Theme = $state('light');
@@ -127,36 +129,39 @@
 		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
 			<p class="font-mono text-[11px] tracking-[1.1px]">PROYEK</p>
 
-			<div class="mt-7 flex flex-col lg:mt-10">
-				<!-- Satu baris. Ditulis manual. Ini sengaja. -->
-				<div class="flex flex-col gap-2.5 py-7">
-					<div class="flex items-center justify-between">
-						<span class="font-mono text-[11px] tracking-[1.1px]">01</span>
-						<div class="flex items-center gap-5">
-							<span class="font-mono text-[11px] tracking-[1.1px]">SVELTEKIT</span>
-							<span class="font-mono text-[11px] tracking-[1.1px]">2026</span>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								class="text-primary"
-							>
-								<path d="M7 17 17 7M9 7h8v8" />
-							</svg>
+			<div class="mt-7 flex flex-col divide-y divide-line lg:mt-10">
+				{#each projects as project, i}
+					<div class="flex flex-col gap-2.5 py-7">
+						<div class="flex items-center justify-between">
+							<span class="font-mono text-[11px] tracking-[1.1px]">
+								{String(i + 1).padStart(2, '0')}
+							</span>
+							<div class="flex items-center gap-5">
+								<span class="font-mono text-[11px] tracking-[1.1px] uppercase">
+									{project.stack}
+								</span>
+								<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-primary"
+								>
+									<path d="M7 17 17 7M9 7h8v8" />
+								</svg>
+							</div>
 						</div>
+						<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
+							{project.title}
+						</h2>
+						<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
 					</div>
-					<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
-						Sistem Absensi Kelas
-					</h2>
-					<p class="text-[15px] leading-[1.55] text-muted">
-						Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.
-					</p>
-				</div>
+				{/each}
 			</div>
 		</div>
 	</section>

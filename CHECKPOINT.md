@@ -1,75 +1,57 @@
-# CP 02 — Dark Mode
+# CP 03 — Each
 
-Satu tombol, dua wajah halaman. Tidak ada warna yang ditulis dua kali.
+Tiga proyek, satu blok markup.
 
 ## Apa yang berubah
 
-- `layout.css` dapat blok `.dark` berisi nilai kedua untuk setiap token.
-- `+page.svelte` dapat satu variabel `$state` dan satu tombol.
-- Foto band ikut berganti, tapi **bukan** lewat `{#if}` — cukup ekspresi di
-  atribut `src`. `{#if}` kita simpan untuk CP04.
+- Konten proyek pindah ke `src/lib/data.ts`.
+- Markup proyek jadi satu `{#each}`. Menambah proyek ke-4 sekarang cuma
+  menambah satu objek di `data.ts` — nol baris HTML.
+- Garis pemisah antar baris pakai `divide-y`, bukan `<hr>` manual.
 
-Yang penting: tidak ada satu pun kelas warna yang berubah. `bg-bg` tetap
-`bg-bg`. Yang berubah hanya isi variabelnya.
+Perhatikan yang **tidak** berubah: tidak ada satu pun kelas warna atau ukuran
+yang ikut pindah. Data hanya mengganti isi, bukan bentuk.
 
 ## Salin ini
 
-`src/routes/layout.css`
+`src/lib/data.ts`
 
-```css
-@import 'tailwindcss';
-@import '@fontsource-variable/geologica';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+```ts
+export type Project = {
+	title: string;
+	description: string;
+	stack: string;
+	year: number;
+};
 
-/* Tema gelap dikendalikan class, bukan setting OS. Tanpa baris ini, `dark:`
-   mengikuti laptop masing-masing peserta dan tombol tema tidak berpengaruh. */
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-	--bg: #fcfcfa;
-	--surface: #f4f4f1;
-	--line: #e2e2dc;
-	--ink: #12120f;
-	--muted: #6b6b62;
-	--primary: #1d3fd1;
-	--on-primary: #fcfcfa;
-	--success: #047857;
-	--danger: #b91c1c;
-}
-
-.dark {
-	--bg: #0c0c0b;
-	--surface: #161615;
-	--line: #2b2b27;
-	--ink: #edece4;
-	--muted: #9c9c90;
-	--primary: #8aa4ff;
-	--on-primary: #0c0c0b;
-	--success: #6ee7a0;
-	--danger: #fb8a8a;
-}
-
-@theme inline {
-	--color-bg: var(--bg);
-	--color-surface: var(--surface);
-	--color-line: var(--line);
-	--color-ink: var(--ink);
-	--color-muted: var(--muted);
-	--color-primary: var(--primary);
-	--color-on-primary: var(--on-primary);
-	--color-success: var(--success);
-	--color-danger: var(--danger);
-	--font-sans: 'Geologica Variable', sans-serif;
-	--font-mono: 'IBM Plex Mono', monospace;
-	--radius-xs: 2px;
-}
+export const projects: Project[] = [
+	{
+		title: 'Sistem Absensi Kelas',
+		description: 'Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.',
+		stack: 'SvelteKit',
+		year: 2026
+	},
+	{
+		title: 'Landing Page UKM',
+		description: 'Halaman profil organisasi sekolah dengan formulir pendaftaran anggota.',
+		stack: 'Tailwind',
+		year: 2026
+	},
+	{
+		title: 'Dashboard Jaringan',
+		description: 'Pemantauan status perangkat lab sekolah secara real-time.',
+		stack: 'TypeScript',
+		year: 2026
+	}
+];
 ```
 
 `src/routes/+page.svelte`
 
 ```svelte
 <script lang="ts">
+	import { projects } from '$lib/data';
+
 	type Theme = 'light' | 'dark';
 
 	let theme: Theme = $state('light');
@@ -198,36 +180,39 @@ Yang penting: tidak ada satu pun kelas warna yang berubah. `bg-bg` tetap
 		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
 			<p class="font-mono text-[11px] tracking-[1.1px]">PROYEK</p>
 
-			<div class="mt-7 flex flex-col lg:mt-10">
-				<!-- Satu baris. Ditulis manual. Ini sengaja. -->
-				<div class="flex flex-col gap-2.5 py-7">
-					<div class="flex items-center justify-between">
-						<span class="font-mono text-[11px] tracking-[1.1px]">01</span>
-						<div class="flex items-center gap-5">
-							<span class="font-mono text-[11px] tracking-[1.1px]">SVELTEKIT</span>
-							<span class="font-mono text-[11px] tracking-[1.1px]">2026</span>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								class="text-primary"
-							>
-								<path d="M7 17 17 7M9 7h8v8" />
-							</svg>
+			<div class="mt-7 flex flex-col divide-y divide-line lg:mt-10">
+				{#each projects as project, i}
+					<div class="flex flex-col gap-2.5 py-7">
+						<div class="flex items-center justify-between">
+							<span class="font-mono text-[11px] tracking-[1.1px]">
+								{String(i + 1).padStart(2, '0')}
+							</span>
+							<div class="flex items-center gap-5">
+								<span class="font-mono text-[11px] tracking-[1.1px] uppercase">
+									{project.stack}
+								</span>
+								<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									class="text-primary"
+								>
+									<path d="M7 17 17 7M9 7h8v8" />
+								</svg>
+							</div>
 						</div>
+						<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
+							{project.title}
+						</h2>
+						<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
 					</div>
-					<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
-						Sistem Absensi Kelas
-					</h2>
-					<p class="text-[15px] leading-[1.55] text-muted">
-						Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.
-					</p>
-				</div>
+				{/each}
 			</div>
 		</div>
 	</section>
@@ -265,26 +250,31 @@ Yang penting: tidak ada satu pun kelas warna yang berubah. `bg-bg` tetap
 
 ## Bandingkan
 
-/compare/01-tailwind...02-darkmode
+/compare/02-darkmode...03-each
 
 ## Tantangan
 
-Tombol tema sekarang **lupa** pilihan kalian begitu halaman di-refresh. Coba
-pikirkan: di mana seharusnya pilihan itu disimpan supaya tidak hilang?
+Tambah proyek keempat, lalu **pindahkan ke urutan pertama**. Berapa baris yang
+kalian sentuh? Sekarang bandingkan dengan CP01: di sana kalian harus memindahkan
+seluruh blok `div` dan menomori ulang indeksnya dengan tangan.
 
-Jangan pakai `$effect` untuk ini. `$effect` bukan tempat menyimpan data.
+Bonus: nomor `01`, `02`, `03` dihasilkan dari posisi array, bukan ditulis.
+Coba hapus proyek kedua — nomornya harus tetap rapat.
 
 ## Kalau macet
 
-| Gejala                                | Sebab                                                                      |
-| ------------------------------------- | -------------------------------------------------------------------------- |
-| `dark:` ikut setting OS, bukan tombol | `@custom-variant dark (&:where(.dark, .dark *));` hilang dari `layout.css` |
-| Tombol diklik, tidak ada yang berubah | Warna ditulis langsung (`bg-[#0c0c0b]`) alih-alih lewat token (`bg-bg`)    |
-| Teks jadi tak terbaca                 | Ada `text-ink` yang lupa dipasang, jadi mewarisi warna default browser     |
-| Foto tidak berganti                   | Nama file salah, atau `band-dark.png` belum ada di `static/images/`        |
+| Gejala                           | Sebab                                                    |
+| -------------------------------- | -------------------------------------------------------- |
+| Daftar kosong, tanpa error       | Nama variabel tidak cocok antara `data.ts` dan `{#each}` |
+| `Cannot find module '$lib/data'` | `paths` untuk `$lib` belum ada di `tsconfig.json`        |
+| Semua baris menempel             | `divide-y` lupa dipasang di elemen pembungkus            |
+| Nomor jadi `1` bukan `01`        | `padStart(2, '0')` hilang                                |
 
 ## Verifikasi
 
-Klik tombol tema. Latar harus berubah dari `#FCFCFA` ke `#0C0C0B`, teks dari
-`#12120F` ke `#EDECE4`, dan ikon berganti dari bulan ke matahari.
-Klik sekali lagi — harus kembali persis seperti semula.
+```sh
+bun run check
+```
+
+Tiga baris proyek, masing-masing dipisah satu garis tipis, dan garis **tidak**
+muncul setelah baris terakhir. Di 390px tidak boleh ada scroll ke samping.
