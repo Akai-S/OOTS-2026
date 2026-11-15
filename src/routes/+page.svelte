@@ -1,4 +1,10 @@
-<div class="min-h-dvh bg-bg text-ink">
+<script lang="ts">
+	type Theme = 'light' | 'dark';
+
+	let theme: Theme = $state('light');
+</script>
+
+<div class="min-h-dvh bg-bg text-ink {theme === 'dark' ? 'dark' : ''}">
 	<!-- nav -->
 	<header class="border-b border-line">
 		<div
@@ -16,6 +22,7 @@
 				<button
 					type="button"
 					aria-label="Ganti tema"
+					onclick={() => (theme = theme === 'dark' ? 'light' : 'dark')}
 					class="flex h-11 w-11 items-center justify-center border border-line"
 				>
 					<svg
@@ -26,6 +33,20 @@
 						stroke="currentColor"
 						stroke-width="1.5"
 						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="dark:hidden"
+					>
+						<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+					</svg>
+					<svg
+						width="17"
+						height="17"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						class="hidden dark:block"
 					>
 						<circle cx="12" cy="12" r="4" />
 						<path
@@ -92,7 +113,7 @@
 	<!-- band -->
 	<div class="border-t border-line">
 		<img
-			src="/images/band-light.png"
+			src={theme === 'dark' ? '/images/band-dark.png' : '/images/band-light.png'}
 			alt="Foto kegiatan lab RPL"
 			class="h-[220px] w-full object-cover lg:h-[420px]"
 		/>

@@ -1,20 +1,81 @@
-# CP 01 — Tailwind
+# CP 02 — Dark Mode
 
-Halaman pertama yang bisa dilihat orang lain. Semua masih statis.
+Satu tombol, dua wajah halaman. Tidak ada warna yang ditulis dua kali.
 
 ## Apa yang berubah
 
-- Nav, hero, band foto, satu baris proyek, dan footer.
-- Ukuran dan jarak mengikuti satu skala: 24px di HP, 96px di laptop.
-- Baris proyek ditulis **manual**, langsung di markup. Ini sengaja — nanti di CP03
-  kalian akan merasakan sendiri kenapa cara ini tidak bertahan.
+- `layout.css` dapat blok `.dark` berisi nilai kedua untuk setiap token.
+- `+page.svelte` dapat satu variabel `$state` dan satu tombol.
+- Foto band ikut berganti, tapi **bukan** lewat `{#if}` — cukup ekspresi di
+  atribut `src`. `{#if}` kita simpan untuk CP04.
+
+Yang penting: tidak ada satu pun kelas warna yang berubah. `bg-bg` tetap
+`bg-bg`. Yang berubah hanya isi variabelnya.
 
 ## Salin ini
+
+`src/routes/layout.css`
+
+```css
+@import 'tailwindcss';
+@import '@fontsource-variable/geologica';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/* Tema gelap dikendalikan class, bukan setting OS. Tanpa baris ini, `dark:`
+   mengikuti laptop masing-masing peserta dan tombol tema tidak berpengaruh. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+	--bg: #fcfcfa;
+	--surface: #f4f4f1;
+	--line: #e2e2dc;
+	--ink: #12120f;
+	--muted: #6b6b62;
+	--primary: #1d3fd1;
+	--on-primary: #fcfcfa;
+	--success: #047857;
+	--danger: #b91c1c;
+}
+
+.dark {
+	--bg: #0c0c0b;
+	--surface: #161615;
+	--line: #2b2b27;
+	--ink: #edece4;
+	--muted: #9c9c90;
+	--primary: #8aa4ff;
+	--on-primary: #0c0c0b;
+	--success: #6ee7a0;
+	--danger: #fb8a8a;
+}
+
+@theme inline {
+	--color-bg: var(--bg);
+	--color-surface: var(--surface);
+	--color-line: var(--line);
+	--color-ink: var(--ink);
+	--color-muted: var(--muted);
+	--color-primary: var(--primary);
+	--color-on-primary: var(--on-primary);
+	--color-success: var(--success);
+	--color-danger: var(--danger);
+	--font-sans: 'Geologica Variable', sans-serif;
+	--font-mono: 'IBM Plex Mono', monospace;
+	--radius-xs: 2px;
+}
+```
 
 `src/routes/+page.svelte`
 
 ```svelte
-<div class="min-h-dvh bg-bg text-ink">
+<script lang="ts">
+	type Theme = 'light' | 'dark';
+
+	let theme: Theme = $state('light');
+</script>
+
+<div class="min-h-dvh bg-bg text-ink {theme === 'dark' ? 'dark' : ''}">
 	<!-- nav -->
 	<header class="border-b border-line">
 		<div
@@ -32,6 +93,7 @@ Halaman pertama yang bisa dilihat orang lain. Semua masih statis.
 				<button
 					type="button"
 					aria-label="Ganti tema"
+					onclick={() => (theme = theme === 'dark' ? 'light' : 'dark')}
 					class="flex h-11 w-11 items-center justify-center border border-line"
 				>
 					<svg
@@ -42,6 +104,20 @@ Halaman pertama yang bisa dilihat orang lain. Semua masih statis.
 						stroke="currentColor"
 						stroke-width="1.5"
 						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="dark:hidden"
+					>
+						<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+					</svg>
+					<svg
+						width="17"
+						height="17"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						class="hidden dark:block"
 					>
 						<circle cx="12" cy="12" r="4" />
 						<path
@@ -108,7 +184,7 @@ Halaman pertama yang bisa dilihat orang lain. Semua masih statis.
 	<!-- band -->
 	<div class="border-t border-line">
 		<img
-			src="/images/band-light.png"
+			src={theme === 'dark' ? '/images/band-dark.png' : '/images/band-light.png'}
 			alt="Foto kegiatan lab RPL"
 			class="h-[220px] w-full object-cover lg:h-[420px]"
 		/>
@@ -187,34 +263,28 @@ Halaman pertama yang bisa dilihat orang lain. Semua masih statis.
 </div>
 ```
 
-Foto ada di `static/images/band-light.png`. Kalau file ini tidak ada, gambar
-tidak akan muncul sama sekali — bukan error, cuma kosong.
-
 ## Bandingkan
 
-/compare/00-start...01-tailwind
+/compare/01-tailwind...02-darkmode
 
 ## Tantangan
 
-Ganti nama, tagline, dan isi proyek dengan milik kalian. Lalu tambahkan
-**proyek kedua secara manual** — copy blok `div` yang sama, ubah isinya.
-Hitung berapa tempat yang harus kalian sentuh.
+Tombol tema sekarang **lupa** pilihan kalian begitu halaman di-refresh. Coba
+pikirkan: di mana seharusnya pilihan itu disimpan supaya tidak hilang?
+
+Jangan pakai `$effect` untuk ini. `$effect` bukan tempat menyimpan data.
 
 ## Kalau macet
 
-| Gejala                   | Sebab                                                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Gambar tidak muncul      | File belum ada di `static/images/`, atau path-nya diawali `/images/` bukan `./images/`                     |
-| Nama meluber ke samping  | Nama panjang akan turun ke baris kedua. Itu wajar. Kalau mau tetap satu baris, kecilkan `lg:text-[232px]`. |
-| Semua tulisan jadi tipis | Font belum termuat. Jalankan `bun install` lalu restart `bun run dev`.                                     |
-| Jarak terasa aneh di HP  | Buka DevTools, aktifkan mode perangkat, pilih 390px. Semua `lg:` baru aktif di 1024px ke atas.             |
+| Gejala                                | Sebab                                                                      |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| `dark:` ikut setting OS, bukan tombol | `@custom-variant dark (&:where(.dark, .dark *));` hilang dari `layout.css` |
+| Tombol diklik, tidak ada yang berubah | Warna ditulis langsung (`bg-[#0c0c0b]`) alih-alih lewat token (`bg-bg`)    |
+| Teks jadi tak terbaca                 | Ada `text-ink` yang lupa dipasang, jadi mewarisi warna default browser     |
+| Foto tidak berganti                   | Nama file salah, atau `band-dark.png` belum ada di `static/images/`        |
 
 ## Verifikasi
 
-```sh
-bun run check
-bun run dev
-```
-
-Di 1440px: nama setinggi ±200px, jarak kiri 96px. Di 390px: jarak kiri 24px,
-tidak ada scroll ke samping.
+Klik tombol tema. Latar harus berubah dari `#FCFCFA` ke `#0C0C0B`, teks dari
+`#12120F` ke `#EDECE4`, dan ikon berganti dari bulan ke matahari.
+Klik sekali lagi — harus kembali persis seperti semula.
