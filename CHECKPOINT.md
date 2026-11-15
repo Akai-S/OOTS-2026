@@ -1,18 +1,71 @@
-# CP 03 — Each
+# CP 04 — Komponen
 
-Tiga proyek, satu blok markup.
+Satu blok markup yang dipakai berkali-kali berubah jadi satu file.
 
 ## Apa yang berubah
 
-- Konten proyek pindah ke `src/lib/data.ts`.
-- Markup proyek jadi satu `{#each}`. Menambah proyek ke-4 sekarang cuma
-  menambah satu objek di `data.ts` — nol baris HTML.
-- Garis pemisah antar baris pakai `divide-y`, bukan `<hr>` manual.
+- `src/lib/components/ProjectRow.svelte`: baris proyek jadi komponen.
+  Menerima `project` dan `index` lewat `$props()`.
+- `{#each}` sekarang **keyed** — `(project.title)`. Svelte tahu baris mana
+  yang berubah, bukan menebak dari urutan.
+- `{#if project.href}` — panah hanya muncul kalau proyeknya punya tautan.
+  Hapus `href` dari satu proyek di `data.ts` dan panahnya hilang.
+- Section **Tentang**: potret, bio, empat baris fakta, dan badge keahlian.
+  Isinya dari `profile` di `data.ts`.
 
-Perhatikan yang **tidak** berubah: tidak ada satu pun kelas warna atau ukuran
-yang ikut pindah. Data hanya mengganti isi, bukan bentuk.
+Perhatikan `href?: string` — tanda tanya itu artinya opsional. TypeScript akan
+menolak kalian membaca `project.href` tanpa memeriksanya lebih dulu. `{#if}`
+adalah pemeriksaan itu.
 
 ## Salin ini
+
+`src/lib/components/ProjectRow.svelte`
+
+```svelte
+<script lang="ts">
+	import type { Project } from '$lib/data';
+
+	type Props = {
+		project: Project;
+		index: number;
+	};
+
+	let { project, index }: Props = $props();
+</script>
+
+<div class="flex flex-col gap-2.5 py-7">
+	<div class="flex items-center justify-between">
+		<span class="font-mono text-[11px] tracking-[1.1px]">
+			{String(index + 1).padStart(2, '0')}
+		</span>
+
+		<div class="flex items-center gap-5">
+			<span class="font-mono text-[11px] tracking-[1.1px] uppercase">{project.stack}</span>
+			<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
+
+			{#if project.href}
+				<a href={project.href} aria-label="Buka {project.title}" class="text-primary">
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path d="M7 17 17 7M9 7h8v8" />
+					</svg>
+				</a>
+			{/if}
+		</div>
+	</div>
+
+	<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">{project.title}</h2>
+	<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
+</div>
+```
 
 `src/lib/data.ts`
 
@@ -22,6 +75,7 @@ export type Project = {
 	description: string;
 	stack: string;
 	year: number;
+	href?: string;
 };
 
 export const projects: Project[] = [
@@ -29,28 +83,43 @@ export const projects: Project[] = [
 		title: 'Sistem Absensi Kelas',
 		description: 'Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.',
 		stack: 'SvelteKit',
-		year: 2026
+		year: 2026,
+		href: 'https://github.com/nama-kamu/absensi'
 	},
 	{
 		title: 'Landing Page UKM',
 		description: 'Halaman profil organisasi sekolah dengan formulir pendaftaran anggota.',
 		stack: 'Tailwind',
-		year: 2026
+		year: 2026,
+		href: 'https://github.com/nama-kamu/ukm'
 	},
 	{
 		title: 'Dashboard Jaringan',
 		description: 'Pemantauan status perangkat lab sekolah secara real-time.',
 		stack: 'TypeScript',
-		year: 2026
+		year: 2026,
+		href: 'https://github.com/nama-kamu/dashboard'
 	}
 ];
+
+export const profile = {
+	bio: 'Saya suka membangun hal yang berguna dan terlihat rapi. Saat ini belajar SvelteKit dan TypeScript, sambil mengerjakan proyek kecil untuk sekolah dan komunitas.',
+	facts: [
+		{ label: 'FOKUS', value: 'Antarmuka web & sistem informasi' },
+		{ label: 'STACK', value: 'SvelteKit · TypeScript · Tailwind' },
+		{ label: 'LOKASI', value: 'Indonesia' },
+		{ label: 'STATUS', value: 'Terbuka untuk kolaborasi' }
+	],
+	skills: ['HTML', 'CSS', 'JavaScript', 'SvelteKit', 'Tailwind', 'Git']
+};
 ```
 
 `src/routes/+page.svelte`
 
 ```svelte
 <script lang="ts">
-	import { projects } from '$lib/data';
+	import { projects, profile } from '$lib/data';
+	import ProjectRow from '$lib/components/ProjectRow.svelte';
 
 	type Theme = 'light' | 'dark';
 
@@ -181,38 +250,54 @@ export const projects: Project[] = [
 			<p class="font-mono text-[11px] tracking-[1.1px]">PROYEK</p>
 
 			<div class="mt-7 flex flex-col divide-y divide-line lg:mt-10">
-				{#each projects as project, i}
-					<div class="flex flex-col gap-2.5 py-7">
-						<div class="flex items-center justify-between">
-							<span class="font-mono text-[11px] tracking-[1.1px]">
-								{String(i + 1).padStart(2, '0')}
-							</span>
-							<div class="flex items-center gap-5">
-								<span class="font-mono text-[11px] tracking-[1.1px] uppercase">
-									{project.stack}
-								</span>
-								<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
-								<svg
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									class="text-primary"
-								>
-									<path d="M7 17 17 7M9 7h8v8" />
-								</svg>
-							</div>
-						</div>
-						<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
-							{project.title}
-						</h2>
-						<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
-					</div>
+				{#each projects as project, i (project.title)}
+					<ProjectRow {project} index={i} />
 				{/each}
+			</div>
+		</div>
+	</section>
+
+	<!-- tentang -->
+	<section id="tentang" class="border-t border-line">
+		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
+			<p class="font-mono text-[11px] tracking-[1.1px]">TENTANG</p>
+
+			<div class="mt-7 flex flex-col items-start gap-8 lg:mt-10 lg:flex-row lg:gap-24">
+				<img
+					src={theme === 'dark' ? '/images/portrait-dark.png' : '/images/portrait-light.png'}
+					alt="Foto profil"
+					class="h-[428px] w-full object-cover lg:h-[525px] lg:w-[420px]"
+				/>
+
+				<div class="flex w-full flex-col gap-7">
+					<p class="max-w-[520px] text-[17px] leading-[1.6] text-muted lg:text-xl">
+						{profile.bio}
+					</p>
+
+					<div class="flex flex-col divide-y divide-line">
+						{#each profile.facts as fact}
+							<div class="flex items-center justify-between gap-8 py-4">
+								<span class="font-mono text-[11px] tracking-[1.1px] text-muted">
+									{fact.label}
+								</span>
+								<span class="text-[15px]">{fact.value}</span>
+							</div>
+						{/each}
+					</div>
+
+					<div class="flex flex-col gap-3">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">KEAHLIAN</span>
+						<div class="flex flex-wrap gap-2">
+							{#each profile.skills as skill}
+								<span
+									class="border border-line px-2.5 py-[7px] font-mono text-[11px] tracking-[1.1px] text-muted"
+								>
+									{skill}
+								</span>
+							{/each}
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -250,25 +335,29 @@ export const projects: Project[] = [
 
 ## Bandingkan
 
-/compare/02-darkmode...03-each
+/compare/03-each...04-komponen
 
 ## Tantangan
 
-Tambah proyek keempat, lalu **pindahkan ke urutan pertama**. Berapa baris yang
-kalian sentuh? Sekarang bandingkan dengan CP01: di sana kalian harus memindahkan
-seluruh blok `div` dan menomori ulang indeksnya dengan tangan.
+Halaman ini sekarang punya dua tempat yang memakai pola "baris dengan garis
+pemisah": daftar proyek dan daftar fakta. Yang satu sudah jadi komponen, yang
+satu belum.
 
-Bonus: nomor `01`, `02`, `03` dihasilkan dari posisi array, bukan ditulis.
-Coba hapus proyek kedua — nomornya harus tetap rapat.
+Mana yang **layak** dijadikan komponen, dan mana yang tidak? Komponen yang
+dipakai sekali bukan komponen — itu cuma file tambahan.
+
+Bonus: ganti `(project.title)` dengan `(project)` di `{#each}`. Apa yang rusak
+saat kalian mengubah urutan proyek?
 
 ## Kalau macet
 
-| Gejala                           | Sebab                                                    |
-| -------------------------------- | -------------------------------------------------------- |
-| Daftar kosong, tanpa error       | Nama variabel tidak cocok antara `data.ts` dan `{#each}` |
-| `Cannot find module '$lib/data'` | `paths` untuk `$lib` belum ada di `tsconfig.json`        |
-| Semua baris menempel             | `divide-y` lupa dipasang di elemen pembungkus            |
-| Nomor jadi `1` bukan `01`        | `padStart(2, '0')` hilang                                |
+| Gejala                                                   | Sebab                                                                |
+| -------------------------------------------------------- | -------------------------------------------------------------------- |
+| `Cannot find module '$lib/components/ProjectRow.svelte'` | Path salah, atau nama file beda huruf besar/kecil (Linux peka huruf) |
+| `project` undefined di komponen                          | Lupa `let { project } = $props();`                                   |
+| Props tidak berubah saat data diubah                     | `{#each}` tidak keyed, atau key-nya tidak unik                       |
+| Gambar potret gepeng                                     | `object-cover` hilang                                                |
+| `{#if}` tidak menghilangkan panah                        | Yang dicek bukan `project.href`, atau `href` masih ada di `data.ts`  |
 
 ## Verifikasi
 
@@ -276,5 +365,6 @@ Coba hapus proyek kedua — nomornya harus tetap rapat.
 bun run check
 ```
 
-Tiga baris proyek, masing-masing dipisah satu garis tipis, dan garis **tidak**
-muncul setelah baris terakhir. Di 390px tidak boleh ada scroll ke samping.
+Di 1440px potret harus 420×525, di 390px 342×428. Tiga panah muncul di daftar
+proyek. Hapus `href` dari proyek pertama — panahnya harus hilang, dan tidak ada
+error.

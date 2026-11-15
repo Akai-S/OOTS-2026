@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { projects } from '$lib/data';
+	import { projects, profile } from '$lib/data';
+	import ProjectRow from '$lib/components/ProjectRow.svelte';
 
 	type Theme = 'light' | 'dark';
 
@@ -130,38 +131,54 @@
 			<p class="font-mono text-[11px] tracking-[1.1px]">PROYEK</p>
 
 			<div class="mt-7 flex flex-col divide-y divide-line lg:mt-10">
-				{#each projects as project, i}
-					<div class="flex flex-col gap-2.5 py-7">
-						<div class="flex items-center justify-between">
-							<span class="font-mono text-[11px] tracking-[1.1px]">
-								{String(i + 1).padStart(2, '0')}
-							</span>
-							<div class="flex items-center gap-5">
-								<span class="font-mono text-[11px] tracking-[1.1px] uppercase">
-									{project.stack}
-								</span>
-								<span class="font-mono text-[11px] tracking-[1.1px]">{project.year}</span>
-								<svg
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									class="text-primary"
-								>
-									<path d="M7 17 17 7M9 7h8v8" />
-								</svg>
-							</div>
-						</div>
-						<h2 class="text-[28px] leading-[1.15] font-medium tracking-[-0.5px]">
-							{project.title}
-						</h2>
-						<p class="text-[15px] leading-[1.55] text-muted">{project.description}</p>
-					</div>
+				{#each projects as project, i (project.title)}
+					<ProjectRow {project} index={i} />
 				{/each}
+			</div>
+		</div>
+	</section>
+
+	<!-- tentang -->
+	<section id="tentang" class="border-t border-line">
+		<div class="mx-auto max-w-[1440px] px-6 pt-5 pb-14 lg:px-24 lg:pb-24">
+			<p class="font-mono text-[11px] tracking-[1.1px]">TENTANG</p>
+
+			<div class="mt-7 flex flex-col items-start gap-8 lg:mt-10 lg:flex-row lg:gap-24">
+				<img
+					src={theme === 'dark' ? '/images/portrait-dark.png' : '/images/portrait-light.png'}
+					alt="Foto profil"
+					class="h-[428px] w-full object-cover lg:h-[525px] lg:w-[420px]"
+				/>
+
+				<div class="flex w-full flex-col gap-7">
+					<p class="max-w-[520px] text-[17px] leading-[1.6] text-muted lg:text-xl">
+						{profile.bio}
+					</p>
+
+					<div class="flex flex-col divide-y divide-line">
+						{#each profile.facts as fact}
+							<div class="flex items-center justify-between gap-8 py-4">
+								<span class="font-mono text-[11px] tracking-[1.1px] text-muted">
+									{fact.label}
+								</span>
+								<span class="text-[15px]">{fact.value}</span>
+							</div>
+						{/each}
+					</div>
+
+					<div class="flex flex-col gap-3">
+						<span class="font-mono text-[11px] tracking-[1.1px] text-muted">KEAHLIAN</span>
+						<div class="flex flex-wrap gap-2">
+							{#each profile.skills as skill}
+								<span
+									class="border border-line px-2.5 py-[7px] font-mono text-[11px] tracking-[1.1px] text-muted"
+								>
+									{skill}
+								</span>
+							{/each}
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
