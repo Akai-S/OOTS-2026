@@ -85,7 +85,7 @@
 	<!-- hero -->
 	<section class="mx-auto max-w-[1440px] px-6 pt-16 pb-14 lg:px-24 lg:pt-[120px]">
 		<h1
-			class="text-[62px] leading-[0.88] font-medium tracking-[-1.6px] lg:text-[232px] lg:tracking-[-9px]"
+			class="text-[62px] leading-[0.88] font-medium tracking-[-1.6px] lg:text-[100px] lg:tracking-[-9px]"
 		>
 			Muhammad Qaisidin Umay
 		</h1>
