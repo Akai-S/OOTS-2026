@@ -8,35 +8,35 @@ export type Project = {
 
 export const projects: Project[] = [
 	{
-		title: 'Sistem Absensi Kelas',
-		description: 'Aplikasi pencatatan kehadiran siswa dengan rekap otomatis per bulan.',
-		stack: 'SvelteKit',
+		title: 'Sistem Pelanggaran Siswa',
+		description: 'Aplikasi pencatatan pelanggaran siswa dengan rekap otomatis per bulan.',
+		stack: 'Python',
 		year: 2026,
-		href: 'https://github.com/nama-kamu/absensi'
+		href: 'https://github.com/Akai/pelanggaran'
 	},
 	{
-		title: 'Landing Page UKM',
-		description: 'Halaman profil organisasi sekolah dengan formulir pendaftaran anggota.',
-		stack: 'Tailwind',
+		title: 'Aplikasi pencatatan keuangan OTTERA',
+		description: 'Aplikasi pencatatan keuangan pribadi yang memiliki fitur perhitungan HPP',
+		stack: 'Java',
 		year: 2026,
-		href: 'https://github.com/nama-kamu/ukm'
+		href: 'https://github.com/Akai/OTTERA'
 	},
 	{
-		title: 'Dashboard Jaringan',
-		description: 'Pemantauan status perangkat lab sekolah secara real-time.',
-		stack: 'TypeScript',
+		title: 'Tenda Pecel Lele',
+		description: 'Game simulasi menjalankan usaha tenda pecel lele dan harus memperhatikan anomali (Unity 3D)',
+		stack: 'C#',
 		year: 2026,
-		href: 'https://github.com/nama-kamu/dashboard'
-	}
+			href: 'https://github.com/Akai/Tenda-Pecel-Lele'
+		}
 ];
 
 export const profile = {
 	bio: 'Saya suka membangun hal yang berguna dan terlihat rapi. Saat ini belajar SvelteKit dan TypeScript, sambil mengerjakan proyek kecil untuk sekolah dan komunitas.',
 	facts: [
-		{ label: 'FOKUS', value: 'Antarmuka web & sistem informasi' },
-		{ label: 'STACK', value: 'SvelteKit · TypeScript · Tailwind' },
+		{ label: 'FOKUS', value: 'Antarmuka web, sistem informasi, & game development' },
+		{ label: 'STACK', value: 'SvelteKit · TypeScript · Tailwind · C#'},
 		{ label: 'LOKASI', value: 'Indonesia' },
 		{ label: 'STATUS', value: 'Terbuka untuk kolaborasi' }
 	],
-	skills: ['HTML', 'CSS', 'JavaScript', 'SvelteKit', 'Tailwind', 'Git']
+	skills: ['HTML', 'CSS', 'JavaScript', 'Python', 'PHP', 'SvelteKit', 'Tailwind', 'Git', 'Unity']
 };

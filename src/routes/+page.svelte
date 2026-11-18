@@ -148,7 +148,7 @@
 
 			<div class="mt-7 flex flex-col items-start gap-8 lg:mt-10 lg:flex-row lg:gap-24">
 				<img
-					src={theme === 'dark' ? '/images/Clay ◒ (@rivalclay) on X.jpg' : '/images/Clay ◒ (@rivalclay) on X.jpg'}
+					src={theme === 'dark' ? '/images/IMG-20261007-WA0067.jpg' : '/images/IMG-20261007-WA0067.jpg'}
 					alt="Foto profil"
 					class="h-[428px] w-full object-cover lg:h-[525px] lg:w-[420px]"
 				/>
