@@ -121,7 +121,7 @@
 <img
     src="/images/810085051753913531.jpg"
     alt="Foto kegiatan lab RPL"
-    class="h-auto w-full"
+	class="h-[220px] w-full object-cover lg:h-[420px]"
 /> 	
 		<div class="mx-auto max-w-[1440px] px-6 py-4 lg:px-24">
 			<p class="font-mono text-[11px] tracking-[1.1px] text-muted">PPLG — SMK NEGERI 8 · 2026</p>
